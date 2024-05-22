@@ -2,141 +2,109 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define LINHAS 3
-#define COLUNAS 3
+#define BOARD_SIZE 5
+#define NUM_SHIPS 3
 
-char tabuleiro[LINHAS][COLUNAS];
+// Estrutura para representar uma posição no tabuleiro
+typedef struct {
+    int x;
+    int y;
+} Position;
 
-// Função para inicializar o tabuleiro
-void inicializar_tabuleiro() {
-    for (int i = 0; i < LINHAS; i++) {
-        for (int j = 0; j < COLUNAS; j++) {
-            tabuleiro[i][j] = '-';
-        }
-    }
-}
-
-// Função para imprimir o tabuleiro
-void imprimir_tabuleiro() {
-    printf("\n  0 1 2\n");
-    for (int i = 0; i < LINHAS; i++) {
-        printf("%d ", i);
-        for (int j = 0; j < COLUNAS; j++) {
-            printf("%c ", tabuleiro[i][j]);
-        }
-        printf("\n");
-    }
-}
-
-// Função para verificar se o tabuleiro está cheio
-int tabuleiro_cheio() {
-    for (int i = 0; i < LINHAS; i++) {
-        for (int j = 0; j < COLUNAS; j++) {
-            if (tabuleiro[i][j] == '-') {
-                return 0; // Tabuleiro não está cheio
-            }
-        }
-    }
-    return 1; // Tabuleiro está cheio
-}
-
-// Função para verificar se alguém ganhou o jogo
-char verificar_vencedor() {
-    // Verificar linhas e colunas
-    for (int i = 0; i < LINHAS; i++) {
-        if (tabuleiro[i][0] == tabuleiro[i][1] && tabuleiro[i][1] == tabuleiro[i][2] && tabuleiro[i][0] != '-') {
-            return tabuleiro[i][0]; // Linha i venceu
-        }
-        if (tabuleiro[0][i] == tabuleiro[1][i] && tabuleiro[1][i] == tabuleiro[2][i] && tabuleiro[0][i] != '-') {
-            return tabuleiro[0][i]; // Coluna i venceu
-        }
-    }
-
-    // Verificar diagonais
-    if (tabuleiro[0][0] == tabuleiro[1][1] && tabuleiro[1][1] == tabuleiro[2][2] && tabuleiro[0][0] != '-') {
-        return tabuleiro[0][0]; // Diagonal principal venceu
-    }
-    if (tabuleiro[0][2] == tabuleiro[1][1] && tabuleiro[1][1] == tabuleiro[2][0] && tabuleiro[0][2] != '-') {
-        return tabuleiro[0][2]; // Diagonal secundária venceu
-    }
-
-    return ' '; // Não há vencedor
-}
-
-// Função para a jogada do computador
-void jogada_computador() {
-    int linha, coluna;
-    do {
-        linha = rand() % LINHAS;
-        coluna = rand() % COLUNAS;
-    } while (tabuleiro[linha][coluna] != '-');
-    tabuleiro[linha][coluna] = 'O';
-}
+// Estrutura para representar um navio
+typedef struct {
+    Position positions[BOARD_SIZE];
+} Ship;
 
 int main() {
-    int linha, coluna;
-    char vencedor;
+    char board[BOARD_SIZE][BOARD_SIZE];
+    Ship ships[NUM_SHIPS];
+    int num_attacks = 0;
+    char choice;
 
-    // Inicializar o gerador de números aleatórios
-    srand(time(NULL));
-
-    // Inicializar o tabuleiro
-    inicializar_tabuleiro();
-
-    printf("Bem-vindo ao Jogo da Velha!\n");
-    printf("Voce sera X e o computador sera O.\n");
-
-    // Loop do jogo
-    while (1) {
-        // Jogada do jogador
-        do {
-            printf("\nSeu turno. Insira a linha e coluna (0-2): ");
-            scanf("%d %d", &linha, &coluna);
-        } while (linha < 0 || linha >= LINHAS || coluna < 0 || coluna >= COLUNAS || tabuleiro[linha][coluna] != '-');
-        tabuleiro[linha][coluna] = 'X';
-
-        // Imprimir o tabuleiro atualizado
-        imprimir_tabuleiro();
-
-        // Verificar se o jogador venceu
-        vencedor = verificar_vencedor();
-        if (vencedor == 'X') {
-            printf("\nVoce venceu! Parabens!\n");
-            break;
-        } else if (vencedor == 'O') {
-            printf("\nO computador venceu!\n");
-            break;
+    // Inicialização do tabuleiro com espaços vazios ('~')
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        for (int j = 0; j < BOARD_SIZE; j++) {
+            board[i][j] = '~';
         }
-
-        // Verificar se o jogo terminou em empate
-        if (tabuleiro_cheio()) {
-            printf("\nO jogo terminou em empate!\n");
-            break;
-        }
-
-        // Jogada do computador
-        jogada_computador();
-
-        // Imprimir o tabuleiro atualizado
-        imprimir_tabuleiro();
-
-        // Verificar se o computador venceu
-        vencedor = verificar_vencedor();
-        if (vencedor == 'X') {
-            printf("\nVoce venceu! Parabens!\n");
-            break;
-        } else if (vencedor == 'O') {
-            printf("\nO computador venceu!\n");
-            break;
-        }
-
-        // Verificar se o jogo terminou em empate
-        if (tabuleiro_cheio()) {
-            printf("\nO jogo terminou em empate!\n");
-            break;
-        }d
     }
+
+    // Posicionamento aleatório dos navios
+    srand(time(NULL));
+    for (int i = 0; i < NUM_SHIPS; i++) {
+        int x = rand() % BOARD_SIZE;
+        int y = rand() % BOARD_SIZE;
+        ships[i].positions[0].x = x;
+        ships[i].positions[0].y = y;
+    }
+
+    printf("Bem-vindo ao jogo Batalha Naval!\n");
+
+    do {
+        // Limpa a tela do terminal
+        system("clear");
+
+        // Exibição do tabuleiro
+        printf("\nTabuleiro:\n");
+        printf("  0 1 2 3 4\n");
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            printf("%d ", i);
+            for (int j = 0; j < BOARD_SIZE; j++) {
+                printf("%c ", board[i][j]);
+            }
+            printf("\n");
+        }
+
+        // Exibição do menu principal
+        printf("\nMenu Principal:\n");
+        printf("1. Atacar\n");
+        printf("2. Sair do jogo\n");
+        printf("Escolha uma opcao: ");
+        scanf(" %c", &choice);
+
+        switch (choice) {
+            case '1':
+                // Ataque ao tabuleiro
+                int x, y;
+                printf("\nDigite as coordenadas do seu ataque (x y): ");
+                scanf("%d %d", &x, &y);
+                if (x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE) {
+                    printf("Coordenadas fora do tabuleiro. Tente novamente.\n");
+                    continue;
+                }
+
+                // Verifica se houve acerto
+                int hit = 0;
+                for (int i = 0; i < NUM_SHIPS; i++) {
+                    if (ships[i].positions[0].x == x && ships[i].positions[0].y == y) {
+                        board[x][y] = 'X';
+                        printf("Voce atingiu um navio!\n");
+                        hit = 1;
+                        break;
+                    }
+                }
+                if (!hit) {
+                    printf("Voce atingiu a agua.\n");
+                    board[x][y] = 'O';
+                }
+                num_attacks++;
+                break;
+            case '2':
+                printf("Saindo do jogo...\n");
+                break;
+            default:
+                printf("Opcao invalida. Por favor, escolha uma opcao valida.\n");
+        }
+
+        // Verifica se todos os navios foram destruídos ou o jogador optou por sair
+        if (num_attacks == BOARD_SIZE * BOARD_SIZE || choice == '2')
+            break;
+
+        // Aguarda o usuário pressionar Enter antes de continuar
+        printf("\nPressione Enter para continuar...");
+        while(getchar() != '\n');
+
+    } while (1);
 
     return 0;
 }
-

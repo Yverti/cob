@@ -1,155 +1,77 @@
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_USUARIOS 100
-#define MAX_NOME 50
+#define MAX_ENTRIES 100
+#define MAX_NAME_LENGTH 50
 
-struct Usuario {
-  char nome[MAX_NOME];
-  int idade;
-};
-
-// Protótipos das funções
-void cadastrarUsuario(struct Usuario usuarios[], int *numUsuarios);
-void listarUsuarios(struct Usuario usuarios[], int numUsuarios);
-void editarUsuario(struct Usuario usuarios[], int numUsuarios);
-void excluirUsuario(struct Usuario usuarios[], int *numUsuarios);
-void limparBuffer();
+// Definição da estrutura para armazenar os dados
+typedef struct {
+  char name[MAX_NAME_LENGTH];
+  int age;
+  char email[MAX_NAME_LENGTH];
+} Person;
 
 int main() {
-  struct Usuario usuarios[MAX_USUARIOS];
-  int numUsuarios = 0;
-  bool sair = false;
-  int opcao;
+  Person people[MAX_ENTRIES];
+  int num_people = 0;
+  char choice;
 
-  while (!sair) {
-    printf("\n=== Sistema de Cadastro de Usuários ===\n");
-    printf("1. Cadastrar usuário\n");
-    printf("2. Listar usuários cadastrados\n");
-    printf("3. Editar usuário\n");
-    printf("4. Excluir usuário\n");
-    printf("5. Sair\n");
-    printf("Escolha uma opção: ");
-    int deu_certo = scanf("%d", &opcao);
-    limparBuffer();
+  do {
+    // Limpa a tela do terminal
+    int deu_certo = system("clear");
 
-    switch (opcao) {
-    case 1:
-      cadastrarUsuario(usuarios, &numUsuarios);
+    // Exibição do menu principal
+    printf("\nSistema de Cadastro de Pessoas\n");
+    printf("1. Cadastrar pessoa\n");
+    printf("2. Mostrar todas as pessoas cadastradas\n");
+    printf("3. Sair\n");
+    printf("Escolha uma opcao: ");
+    deu_certo = scanf(" %c", &choice);
+
+    switch (choice) {
+    case '1':
+      if (num_people < MAX_ENTRIES) {
+        // Cadastro de uma nova pessoa
+        printf("\nCadastro de Pessoa %d\n", num_people + 1);
+        printf("Nome: ");
+        int deu_certo = scanf("%s", people[num_people].name);
+        printf("Idade: ");
+        deu_certo = scanf("%d", &people[num_people].age);
+        printf("Email: ");
+        deu_certo = scanf("%s", people[num_people].email);
+        num_people++;
+        printf("Pessoa cadastrada com sucesso!\n");
+      } else {
+        printf("Limite de pessoas atingido. Nao e possivel cadastrar mais "
+               "pessoas.\n");
+      }
       break;
-    case 2:
-      listarUsuarios(usuarios, numUsuarios);
+    case '2':
+      if (num_people > 0) {
+        // Exibição de todas as pessoas cadastradas
+        printf("\nPessoas cadastradas:\n");
+        for (int i = 0; i < num_people; i++) {
+          printf("Nome: %s | Idade: %d | Email: %s\n", people[i].name,
+                 people[i].age, people[i].email);
+        }
+      } else {
+        printf("Nenhuma pessoa cadastrada.\n");
+      }
       break;
-    case 3:
-      editarUsuario(usuarios, numUsuarios);
-      break;
-    case 4:
-      excluirUsuario(usuarios, &numUsuarios);
-      break;
-    case 5:
+    case '3':
       printf("Saindo do sistema...\n");
-      sair = true;
       break;
     default:
-      printf("Opção inválida. Tente novamente.\n");
+      printf("Opcao invalida. Por favor, escolha uma opcao valida.\n");
     }
-  }
+
+    // Aguarda o usuário pressionar Enter antes de continuar
+    printf("\nPressione Enter para continuar...");
+    while (getchar() != '\n')
+      ;
+
+  } while (choice != '3');
 
   return 0;
-}
-
-void cadastrarUsuario(struct Usuario usuarios[], int *numUsuarios) {
-  if (*numUsuarios < MAX_USUARIOS) {
-    printf("\nCadastrar novo usuário:\n");
-    printf("Nome: ");
-    fgets(usuarios[*numUsuarios].nome, MAX_NOME, stdin);
-    usuarios[*numUsuarios].nome[strcspn(usuarios[*numUsuarios].nome, "\n")] =
-        '\0'; // Remover o '\n'
-
-    printf("Idade: ");
-    int deu_certo = scanf("%d", &usuarios[*numUsuarios].idade);
-    limparBuffer();
-    if (deu_certo != 1 || usuarios[*numUsuarios].idade < 0) {
-      printf("Entrada inválida. Tente novamente.\n");
-      return;
-    }
-
-    printf("Usuário cadastrado com sucesso!\n");
-    (*numUsuarios)++;
-  } else {
-    printf("Limite de usuários cadastrados atingido.\n");
-  }
-}
-
-void listarUsuarios(struct Usuario usuarios[], int numUsuarios) {
-  if (numUsuarios > 0) {
-    printf("\nLista de usuários cadastrados:\n");
-    for (int i = 0; i < numUsuarios; i++) {
-      printf("Nome: %s, Idade: %d\n", usuarios[i].nome, usuarios[i].idade);
-    }
-  } else {
-    printf("Nenhum usuário cadastrado.\n");
-  }
-}
-
-void editarUsuario(struct Usuario usuarios[], int numUsuarios) {
-  if (numUsuarios > 0) {
-    printf("\nEditar usuário:\n");
-    printf("Digite o número do usuário a ser editado (0-%d): ",
-           numUsuarios - 1);
-    int indice;
-      int deu_certo = scanf("%d", &indice);
-    limparBuffer();
-    if (indice >= 0 && indice < numUsuarios) {
-      printf("Novo nome: ");
-      fgets(usuarios[indice].nome, MAX_NOME, stdin);
-      usuarios[indice].nome[strcspn(usuarios[indice].nome, "\n")] =
-          '\0'; // Remover o '\n'
-
-      printf("Nova idade: ");
-      int deu_certo = scanf("%d", &usuarios[indice].idade);
-      limparBuffer();
-      if (deu_certo != 1 || usuarios[indice].idade < 0) {
-        printf("Entrada inválida. Tente novamente.\n");
-        return;
-      }
-
-      printf("Usuário editado com sucesso!\n");
-    } else {
-      printf("Índice inválido.\n");
-    }
-  } else {
-    printf("Nenhum usuário cadastrado.\n");
-  }
-}
-
-void excluirUsuario(struct Usuario usuarios[], int *numUsuarios) {
-  if (*numUsuarios > 0) {
-    printf("\nExcluir usuário:\n");
-    printf("Digite o número do usuário a ser excluído (0-%d): ",
-           *numUsuarios - 1);
-    int indice;
-     int deu_certo = scanf("%d", &indice);
-    limparBuffer();
-    if (indice >= 0 && indice < *numUsuarios) {
-      for (int i = indice; i < *numUsuarios - 1; i++) {
-        strcpy(usuarios[i].nome, usuarios[i + 1].nome);
-        usuarios[i].idade = usuarios[i + 1].idade;
-      }
-      (*numUsuarios)--;
-      printf("Usuário excluído com sucesso!\n");
-    } else {
-      printf("Índice inválido.\n");
-    }
-  } else {
-    printf("Nenhum usuário cadastrado.\n");
-  }
-}
-
-void limparBuffer() {
-  int c;
-  while ((c = getchar()) != '\n' && c != EOF)
-    ;
 }
