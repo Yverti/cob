@@ -14,6 +14,7 @@ typedef struct {
 // Estrutura para representar um navio
 typedef struct {
     Position positions[BOARD_SIZE];
+    int size;
 } Ship;
 
 int main() {
@@ -32,8 +33,20 @@ int main() {
     // Posicionamento aleatório dos navios
     srand(time(NULL));
     for (int i = 0; i < NUM_SHIPS; i++) {
-        int x = rand() % BOARD_SIZE;
-        int y = rand() % BOARD_SIZE;
+        int x, y;
+        int overlap;
+        do {
+            overlap = 0;
+            x = rand() % BOARD_SIZE;
+            y = rand() % BOARD_SIZE;
+            // Verifica se a posição já está ocupada
+            for (int j = 0; j < i; j++) {
+                if (ships[j].positions[0].x == x && ships[j].positions[0].y == y) {
+                    overlap = 1;
+                    break;
+                }
+            }
+        } while (overlap);
         ships[i].positions[0].x = x;
         ships[i].positions[0].y = y;
     }
@@ -42,7 +55,7 @@ int main() {
 
     do {
         // Limpa a tela do terminal
-        system("clear");
+        int deu_certo = system("clear");
 
         // Exibição do tabuleiro
         printf("\nTabuleiro:\n");
@@ -60,14 +73,14 @@ int main() {
         printf("1. Atacar\n");
         printf("2. Sair do jogo\n");
         printf("Escolha uma opcao: ");
-        scanf(" %c", &choice);
+        deu_certo = scanf(" %c", &choice);
 
         switch (choice) {
             case '1':
                 // Ataque ao tabuleiro
                 int x, y;
                 printf("\nDigite as coordenadas do seu ataque (x y): ");
-                scanf("%d %d", &x, &y);
+                deu_certo = scanf("%d %d", &x, &y);
                 if (x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE) {
                     printf("Coordenadas fora do tabuleiro. Tente novamente.\n");
                     continue;
@@ -96,15 +109,24 @@ int main() {
                 printf("Opcao invalida. Por favor, escolha uma opcao valida.\n");
         }
 
-        // Verifica se todos os navios foram destruídos ou o jogador optou por sair
-        if (num_attacks == BOARD_SIZE * BOARD_SIZE || choice == '2')
+        // Verifica se todos os navios foram destruídos
+        int ships_remaining = 0;
+        for (int i = 0; i < NUM_SHIPS; i++) {
+            if (board[ships[i].positions[0].x][ships[i].positions[0].y] != 'X') {
+                ships_remaining++;
+            }
+        }
+        if (ships_remaining == 0) {
+            printf("Voce destruiu todos os navios! Parabens!\n");
             break;
+        }
 
         // Aguarda o usuário pressionar Enter antes de continuar
         printf("\nPressione Enter para continuar...");
         while(getchar() != '\n');
+        getchar();
 
-    } while (1);
+    } while (choice != '2');
 
     return 0;
 }
