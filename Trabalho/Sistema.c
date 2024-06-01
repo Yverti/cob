@@ -1,77 +1,40 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+import matplotlib.pyplot as plt
+import numpy as np
 
-#define MAX_ENTRIES 100
-#define MAX_NAME_LENGTH 50
+# Parâmetros da elipse
+a = 10 / 3
+b = 5 / 2
 
-// Definição da estrutura para armazenar os dados
-typedef struct {
-  char name[MAX_NAME_LENGTH];
-  int age;
-  char email[MAX_NAME_LENGTH];
-} Person;
+# Parâmetros do quadrado
+L = 5 / np.sqrt(2)
 
-int main() {
-  Person people[MAX_ENTRIES];
-  int num_people = 0;
-  char choice;
+# Coordenadas do quadrado centrado na origem
+square_x = np.array([-L/2, L/2, L/2, -L/2, -L/2])
+square_y = np.array([-L/2, -L/2, L/2, L/2, -L/2])
 
-  do {
-    // Limpa a tela do terminal
-    int deu_certo = system("clear");
+# Rotacionar o quadrado em 45 graus
+theta = np.deg2rad(45)
+cos_theta, sin_theta = np.cos(theta), np.sin(theta)
+x_rot = cos_theta * square_x - sin_theta * square_y
+y_rot = sin_theta * square_x + cos_theta * square_y
 
-    // Exibição do menu principal
-    printf("\nSistema de Cadastro de Pessoas\n");
-    printf("1. Cadastrar pessoa\n");
-    printf("2. Mostrar todas as pessoas cadastradas\n");
-    printf("3. Sair\n");
-    printf("Escolha uma opcao: ");
-    deu_certo = scanf(" %c", &choice);
+# Plot da elipse
+t = np.linspace(0, 2*np.pi, 400)
+x = a * np.cos(t)
+y = b * np.sin(t)
 
-    switch (choice) {
-    case '1':
-      if (num_people < MAX_ENTRIES) {
-        // Cadastro de uma nova pessoa
-        printf("\nCadastro de Pessoa %d\n", num_people + 1);
-        printf("Nome: ");
-        int deu_certo = scanf("%s", people[num_people].name);
-        printf("Idade: ");
-        deu_certo = scanf("%d", &people[num_people].age);
-        printf("Email: ");
-        deu_certo = scanf("%s", people[num_people].email);
-        num_people++;
-        printf("Pessoa cadastrada com sucesso!\n");
-      } else {
-        printf("Limite de pessoas atingido. Nao e possivel cadastrar mais "
-               "pessoas.\n");
-      }
-      break;
-    case '2':
-      if (num_people > 0) {
-        // Exibição de todas as pessoas cadastradas
-        printf("\nPessoas cadastradas:\n");
-        for (int i = 0; i < num_people; i++) {
-          printf("Nome: %s | Idade: %d | Email: %s\n", people[i].name,
-                 people[i].age, people[i].email);
-        }
-      } else {
-        printf("Nenhuma pessoa cadastrada.\n");
-      }
-      break;
-    case '3':
-      printf("Saindo do sistema...\n");
-      break;
-    default:
-      printf("Opcao invalida. Por favor, escolha uma opcao valida.\n");
-    }
+# Criação do gráfico
+fig, ax = plt.subplots()
+ax.plot(x, y, label='Elipse: $\\frac{x^2}{(10/3)^2} + \\frac{y^2}{(5/2)^2} = 1$')
+ax.plot(x_rot, y_rot, label='Quadrado Inscrito', color='red')
 
-    // Aguarda o usuário pressionar Enter antes de continuar
-    printf("\nPressione Enter para continuar...");
-    while (getchar() != '\n')
-      ;
-
-  } while (choice != '3');
-
-  return 0;
-}
+# Configurações do gráfico
+ax.axhline(0, color='black',linewidth=0.5)
+ax.axvline(0, color='black',linewidth=0.5)
+ax.grid(color='gray', linestyle='--', linewidth=0.5)
+ax.set_aspect('equal', 'box')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.legend()
+plt.title('Quadrado Inscrito na Elipse')
+plt.show()
